@@ -12,7 +12,7 @@ public class Draw extends JComponent{
 
 	private BufferedImage image;
 	private BufferedImage backgroundImage;
-	public URL resource = getClass().getResource("run0.png");
+	public URL resource = getClass().getResource("run00.png");
 
 	// circle's position
 	public int x = -9;
@@ -80,22 +80,22 @@ public class Draw extends JComponent{
 		state++;
 
 		if(state == 0){
-			resource = getClass().getResource("run0.png");
+			resource = getClass().getResource("run00.png");
 		}
 		else if(state == 1){
-			resource = getClass().getResource("run1.png");
+			resource = getClass().getResource("run01.png");
 		}
 		else if(state == 2){
-			resource = getClass().getResource("run2.png");
+			resource = getClass().getResource("run02.png");
 		}
 		else if(state == 3){
-			resource = getClass().getResource("run3.png");
+			resource = getClass().getResource("run03.png");
 		}
 		else if(state == 4){
-			resource = getClass().getResource("run4.png");
+			resource = getClass().getResource("run04.png");
 		}
 		else if(state == 5){
-			resource = getClass().getResource("run5.png");
+			resource = getClass().getResource("run05.png");
 			state = 0;
 		}
 
@@ -113,7 +113,7 @@ public class Draw extends JComponent{
 				for(int ctr = 0; ctr < 5; ctr++){
 					try {
 						if(ctr==4){
-							resource = getClass().getResource("run0.png");
+							resource = getClass().getResource("run00.png");
 						}
 						else{
 							resource = getClass().getResource("attack"+ctr+".png");
