@@ -16,7 +16,7 @@ public class Draw extends JComponent{
 
 	// circle's position
 	public int x = -9;
-	public int y = 180;
+	public int y = 125;
 	public int height = 0;
 	public int width = 0;
 
@@ -107,8 +107,8 @@ public class Draw extends JComponent{
 		}
 	}
 
-	public void attackAnimation(){
-		Thread thread1 = new Thread(new Runnable(){
+	public void jumpAnimation(){
+		Thread talon = new Thread(new Runnable(){
 			public void run(){
 				for(int ctr = 0; ctr < 5; ctr++){
 					try {
@@ -116,7 +116,7 @@ public class Draw extends JComponent{
 							resource = getClass().getResource("run00.png");
 						}
 						else{
-							resource = getClass().getResource("attack"+ctr+".png");
+							resource = getClass().getResource("jump"+ctr+".png");
 						}
 						
 						try{
@@ -131,21 +131,16 @@ public class Draw extends JComponent{
 						e.printStackTrace();
 					}
 				}
-
-				for(int x=0; x<monsters.length; x++){
-					if(monsters[x]!=null){
-						if(monsters[x].contact){
-							monsters[x].life = monsters[x].life - 10;
-						}
-					}
-				}
 			}
 		});
-		thread1.start();
+		talon.start();
 	}
 
-	public void attack(){
-		attackAnimation();
+	public void talon(){
+		y = y - 20;
+		jumpAnimation();
+		reloadImage();
+		repaint();
 	}
 
 	public void moveUp(){
@@ -251,4 +246,4 @@ public class Draw extends JComponent{
 			}			
 		}
 	}
-}
+}	

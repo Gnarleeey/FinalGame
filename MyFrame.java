@@ -28,8 +28,8 @@ public class MyFrame extends JFrame implements KeyListener{
 			System.out.println("pos: " + drawing.x + ", " + drawing.y);
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_SPACE){
-			drawing.attack();
-			System.out.println("attack");
+			drawing.talon();
+			System.out.println("pos: " + drawing.x + "," + drawing.y);
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_S){
 			drawing.spawnEnemy();
@@ -51,6 +51,6 @@ public class MyFrame extends JFrame implements KeyListener{
 		gameFrame.setVisible(true);
 		gameFrame.getContentPane().add(gameFrame.drawing);
 		gameFrame.addKeyListener(gameFrame);
-		System.out.println("practical programming");
+		System.out.println("Talon talon");
 	}
 }
