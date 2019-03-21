@@ -1,38 +1,63 @@
 import javax.swing.JFrame;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.Dimension;
 
 public class MyFrame extends JFrame implements KeyListener{
 
-	Draw drawing;
+	Draw draw;
 
-	public MyFrame(){
-		this.drawing = new Draw();
+	private int width;
+	private int height;
+
+	public MyFrame(Draw draw, int width, int height){
+
+		this.draw = draw;
+		this.width = width;
+		this.height = height;
+
+		init();
+
+		
+	}
+
+	private void init(){
+
+
+		setPreferredSize(new Dimension(width, height));
+		setMinimumSize(new Dimension(width, height));
+		setMaximumSize(new Dimension(width, height));
+		setLocationRelativeTo(null);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setVisible(true);
+		getContentPane().add(draw);
+
+		addKeyListener(this);
+		System.out.println("Talon talon");
+		draw.start();
+
 	}
 
 	public void keyPressed(KeyEvent e){
 		if(e.getKeyCode() == KeyEvent.VK_UP){
-			drawing.moveUp();
-			System.out.println("pos: " + drawing.x + ", " + drawing.y);
+			draw.moveUp();
+			System.out.println("pos: " + draw.x + ", " + draw.y);
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_RIGHT){
-			drawing.moveRight();
-			System.out.println("pos: " + drawing.x + ", " + drawing.y);
+			draw.moveRight();
+			System.out.println("pos: " + draw.x + ", " + draw.y);
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_DOWN){
-			drawing.moveDown();
-			System.out.println("pos: " + drawing.x + ", " + drawing.y);
+			draw.moveDown();
+			System.out.println("pos: " + draw.x + ", " + draw.y);
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_LEFT){
-			drawing.moveLeft();
-			System.out.println("pos: " + drawing.x + ", " + drawing.y);
+			draw.moveLeft();
+			System.out.println("pos: " + draw.x + ", " + draw.y);
 		}
 		else if(e.getKeyCode() == KeyEvent.VK_SPACE){
-			drawing.talon();
-			System.out.println("pos: " + drawing.x + "," + drawing.y);
-		}
-		else if(e.getKeyCode() == KeyEvent.VK_S){
-			drawing.spawnEnemy();
+			draw.talon();
+			System.out.println("pos: " + draw.x + "," + draw.y);
 		}
 	}
 
@@ -42,15 +67,5 @@ public class MyFrame extends JFrame implements KeyListener{
 
 	public void keyTyped(KeyEvent e){
 		
-	}
-
-	public static void main(String args[]){
-		MyFrame gameFrame = new MyFrame();
-		gameFrame.setSize(800,261);
-		gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		gameFrame.setVisible(true);
-		gameFrame.getContentPane().add(gameFrame.drawing);
-		gameFrame.addKeyListener(gameFrame);
-		System.out.println("Talon talon");
 	}
 }

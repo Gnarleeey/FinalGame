@@ -1,4 +1,3 @@
-import javax.swing.JComponent;
 import javax.swing.Timer;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -7,11 +6,19 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.Random;
+import java.awt.image.BufferStrategy;
+import java.awt.Canvas;	
 
-public class Draw extends JComponent{
+public class Draw extends Canvas implements Runnable{
 
+	private static MyFrame frame;
 	private BufferedImage image;
 	private BufferedImage backgroundImage;
+
+	private Thread thread;
+	private boolean running = false;
+
+
 	public URL resource = getClass().getResource("run00.png");
 
 	// circle's position
@@ -31,51 +38,96 @@ public class Draw extends JComponent{
 	Monster[] monsters = new Monster[10];
 
 	public Draw(){
+
 		randomizer = new Random();
-		spawnEnemy();
-		
+
 		try{
-			image = ImageIO.read(resource);
 			backgroundImage = ImageIO.read(getClass().getResource("bg23.jpg"));
 		}
 		catch(IOException e){
 			e.printStackTrace();
 		}
 
-		height = image.getHeight();
-		width = image.getWidth();
+		height = backgroundImage.getHeight();
+		width = backgroundImage.getWidth();
 
-		startGame();
 	}
 
-	public void startGame(){
-		Thread gameThread = new Thread(new Runnable(){
-			public void run(){
-				while(true){
-					try{
-						for(int c = 0; c < monsters.length; c++){
-							if(monsters[c]!=null){
-								monsters[c].moveTo(x,y);
-								repaint();
-							}
-						}
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-							e.printStackTrace();
-					}
-				}
-			}
-		});
-		gameThread.start();
-	}
+	
 
-	public void spawnEnemy(){
-		if(enemyCount < 10){
-			monsters[enemyCount] = new Monster(randomizer.nextInt(500), randomizer.nextInt(500), this);
-			enemyCount++;
+	
+	public synchronized void start(){
+
+		if(!running){
+			running = true;
+		}
+
+		try{
+			thread = new Thread(this);
+			thread.start();
+
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 	}
+	public void run(){
 
+		this.requestFocus();
+		long lastTime = System.nanoTime();
+		double amountOfTicks = 60.0;
+		double ns = 1000000000 / amountOfTicks;
+		double delta = 0;
+		long timer = System.currentTimeMillis();
+		int frames = 0;
+
+			while (running){ 
+				long now = System.nanoTime();
+				delta += (now - lastTime) / ns;
+				lastTime = now;
+
+			while(delta >= 1){
+				tick();
+				delta --;
+			}
+			if(running)
+				render();
+			frames++;
+
+			if(System.currentTimeMillis() - timer > 1000){
+				timer += 1000;
+				System.out.println ("FPS: " + frames);
+				frames = 0;
+			}
+		}
+	}
+	private void tick(){
+
+	}
+
+	public void render(){
+
+		BufferStrategy bufferStrategy = this.getBufferStrategy();
+		if(bufferStrategy == null){
+			this.createBufferStrategy(3);
+			return;
+		}
+
+			Graphics g = bufferStrategy.getDrawGraphics();
+
+			g.drawImage(backgroundImage, 0, 0, null);
+			g.drawImage(image, x, y, null);
+		
+		for(int c = 0; c < monsters.length; c++){		
+			if(monsters[c]!=null){
+				g.drawImage(monsters[c].image, monsters[c].xPos, monsters[c].yPos, this);
+				g.setColor(Color.GREEN);
+				g.fillRect(monsters[c].xPos+7, monsters[c].yPos, monsters[c].life, 2);
+			}	
+		}
+		bufferStrategy.show();
+		g.dispose();
+	}
+	
 	public void reloadImage(){
 		state++;
 
@@ -98,13 +150,6 @@ public class Draw extends JComponent{
 			resource = getClass().getResource("run05.png");
 			state = 0;
 		}
-
-		try{
-			image = ImageIO.read(resource);
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
 	}
 
 	public void jumpAnimation(){
@@ -116,7 +161,7 @@ public class Draw extends JComponent{
 							resource = getClass().getResource("run00.png");
 						}
 						else{
-							resource = getClass().getResource("jump"+ctr+".png");
+							resource = getClass().getResource("talon"+ctr+".png");
 						}
 						
 						try{
@@ -147,103 +192,33 @@ public class Draw extends JComponent{
 		y = y - 5;
 		reloadImage();
 		repaint();
-		checkCollision();
+
 	}
 
 	public void moveDown(){
 		y = y + 5;
 		reloadImage();
 		repaint();
-		checkCollision();
+
 	}
 
 	public void moveLeft(){
 		x = x - 5;
 		reloadImage();
 		repaint();
-		checkCollision();
+
 	}
 
 	public void moveRight(){
 		x = x + 5;
 		reloadImage();
 		repaint();
-		checkCollision();
+
 	}
 
-	public void checkCollision(){
-		int xChecker = x + width;
-		int yChecker = y;
 
-		for(int x=0; x<monsters.length; x++){
-			boolean collideX = false;
-			boolean collideY = false;
 
-			if(monsters[x]!=null){
-				monsters[x].contact = false;
-
-				if(yChecker > monsters[x].yPos){
-					if(yChecker-monsters[x].yPos < monsters[x].height){
-						collideY = true;
-						System.out.println("collideY");
-					}
-				}
-				else{
-					if(monsters[x].yPos - (yChecker+height) < monsters[x].height){
-						collideY = true;
-						System.out.println("collideY");
-					}
-				}
-
-				if(xChecker > monsters[x].xPos){
-					if((xChecker-width)-monsters[x].xPos < monsters[x].width){
-						collideX = true;
-						System.out.println("collideX");
-					}
-				}
-				else{
-					if(monsters[x].xPos-xChecker < monsters[x].width){
-						collideX = true;
-						System.out.println("collideX");
-					}
-				}
-			}
-
-			if(collideX && collideY){
-				System.out.println("collision!");
-				monsters[x].contact = true;
-			}
-		}
-	}
-	
-	public void paintComponent(Graphics g){
-		super.paintComponent(g);
-		g.drawImage(backgroundImage, 0, 0, this);
-
-		// character grid for hero
-		// g.setColor(Color.YELLOW);
-		// g.fillRect(x, y, width, height);
-		g.drawImage(image, x, y, this);
-		
-		for(int c = 0; c < monsters.length; c++){		
-			if(monsters[c]!=null){
-				// character grid for monsters
-				// g.setColor(Color.BLUE);
-				// g.fillRect(monsters[c].xPos, monsters[c].yPos+5, monsters[c].width, monsters[c].height);
-				g.drawImage(monsters[c].image, monsters[c].xPos, monsters[c].yPos, this);
-				g.setColor(Color.GREEN);
-				g.fillRect(monsters[c].xPos+7, monsters[c].yPos, monsters[c].life, 2);
-			}	
-		}
-	}
-
-	public void checkDeath(){
-		for(int c = 0; c < monsters.length; c++){
-			if(monsters[c]!=null){
-				if(!monsters[c].alive){
-					monsters[c] = null;
-				}
-			}			
-		}
+	public static void main(String args[]){
+		frame = new MyFrame(new Draw(), 800, 261);
 	}
 }	
