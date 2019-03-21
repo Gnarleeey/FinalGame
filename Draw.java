@@ -5,41 +5,38 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.net.URL;
-import java.util.Random;
 import java.awt.image.BufferStrategy;
 import java.awt.Canvas;	
+import java.util.ArrayList;
+import java.util.Random;
 
 public class Draw extends Canvas implements Runnable{
 
 	private static MyFrame frame;
+	protected Controls control;
 	private BufferedImage image;
 	private BufferedImage backgroundImage;
 
 	private Thread thread;
 	private boolean running = false;
 
+	public Player player;
+	public Camera cam;
+	public Random rand = new Random();
 
 	public URL resource = getClass().getResource("run00.png");
+	public ArrayList<Block> list = new ArrayList<Block>();
 
-	// circle's position
+
 	public int x = -9;
 	public int y = 125;
 	public int height = 0;
 	public int width = 0;
 
-	// animation states
 	public int state = 0;
-
-	// randomizer
-	public Random randomizer;
-
-	// enemy
-	public int enemyCount;
-	Monster[] monsters = new Monster[10];
 
 	public Draw(){
 
-		randomizer = new Random();
 
 		try{
 			backgroundImage = ImageIO.read(getClass().getResource("bg23.jpg"));
@@ -51,6 +48,21 @@ public class Draw extends Canvas implements Runnable{
 		height = backgroundImage.getHeight();
 		width = backgroundImage.getWidth();
 
+		init();
+
+	}
+
+	private void init(){
+
+		player = new Player(40, 130);
+		cam = new Camera(0, 0);
+
+		control = new Controls(player);
+		addKeyListener(control);
+
+		for(int i = 0; i <=20; i++){
+			list.add(new Block(rand.nextInt(backgroundImage.getWidth()*10), backgroundImage.getHeight() - 100, 25, 25));
+		}
 	}
 
 	
@@ -101,7 +113,8 @@ public class Draw extends Canvas implements Runnable{
 		}
 	}
 	private void tick(){
-
+		player.tick();
+		cam.tick(player);
 	}
 
 	public void render(){
@@ -114,16 +127,25 @@ public class Draw extends Canvas implements Runnable{
 
 			Graphics g = bufferStrategy.getDrawGraphics();
 
-			g.drawImage(backgroundImage, 0, 0, null);
+
+			//////////////////////////////////////////
+			g.translate(cam.getX(), cam.getY());
+			for(int i = 0; i < backgroundImage.getWidth()*10; i+=backgroundImage.getWidth()){
+				g.drawImage(backgroundImage, i, 0, null);
+			}
+			for(int i = 0; i < list.size()- 1; i++){
+				list.get(i).render(g);
+			}
+
 			g.drawImage(image, x, y, null);
-		
-		for(int c = 0; c < monsters.length; c++){		
-			if(monsters[c]!=null){
-				g.drawImage(monsters[c].image, monsters[c].xPos, monsters[c].yPos, this);
-				g.setColor(Color.GREEN);
-				g.fillRect(monsters[c].xPos+7, monsters[c].yPos, monsters[c].life, 2);
-			}	
-		}
+
+
+			g.translate(-cam.getX(), -cam.getY());
+			//////////////////////////////////////////
+
+				g.drawImage(player.image1, player.x, player.y, null);
+
+
 		bufferStrategy.show();
 		g.dispose();
 	}
@@ -152,73 +174,8 @@ public class Draw extends Canvas implements Runnable{
 		}
 	}
 
-	public void jumpAnimation(){
-		Thread talon = new Thread(new Runnable(){
-			public void run(){
-				for(int ctr = 0; ctr < 5; ctr++){
-					try {
-						if(ctr==4){
-							resource = getClass().getResource("run00.png");
-						}
-						else{
-							resource = getClass().getResource("talon"+ctr+".png");
-						}
-						
-						try{
-							image = ImageIO.read(resource);
-						}
-						catch(IOException e){
-							e.printStackTrace();
-						}
-				        repaint();
-				        Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		talon.start();
-	}
-
-	public void talon(){
-		y = y - 20;
-		jumpAnimation();
-		reloadImage();
-		repaint();
-	}
-
-	public void moveUp(){
-		y = y - 5;
-		reloadImage();
-		repaint();
-
-	}
-
-	public void moveDown(){
-		y = y + 5;
-		reloadImage();
-		repaint();
-
-	}
-
-	public void moveLeft(){
-		x = x - 5;
-		reloadImage();
-		repaint();
-
-	}
-
-	public void moveRight(){
-		x = x + 5;
-		reloadImage();
-		repaint();
-
-	}
-
-
-
 	public static void main(String args[]){
 		frame = new MyFrame(new Draw(), 800, 261);
+
 	}
 }	
