@@ -41,6 +41,7 @@ public class Player{
 			y++;
 		}
 	}
+	
 
 	public void render(Graphics g){
 
